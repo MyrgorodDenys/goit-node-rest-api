@@ -1,6 +1,6 @@
-const fs = require("node:fs/promises");
-const path = require("node:path");
-const { v4: uuidv4 } = require("uuid");
+import * as fs from "node:fs/promises";
+import path from "node:path";
+import { v4 as uuidv4 } from "uuid";
 
 const contactsPath = path.join("db", "contacts.json");
 
@@ -38,23 +38,24 @@ async function removeContact(contactId) {
     return null;
   }
 }
-
-async function addContact(data) {
+async function addContact(name, email, phone) {
   try {
-    const dataContacts = await listContacts();
     const newContact = {
       id: uuidv4(),
-      ...data,
+      name,
+      email,
+      phone,
     };
-    dataContacts.push(newContact);
-    await fs.writeFile(contactsPath, JSON.stringify(dataContacts, null, 2));
+    const allContacts = await listContacts();
+    allContacts.push(newContact);
+    await fs.writeFile(contactsPath, JSON.stringify(allContacts, null, 2));
     return newContact;
   } catch (error) {
     return null;
   }
 }
 
-async function updateContact(contactId, data) {
+async function updateContactId(contactId, data) {
   try {
     const dataContacts = await listContacts();
     const indexUpdateContact = dataContacts.findIndex(
@@ -74,10 +75,10 @@ async function updateContact(contactId, data) {
   }
 }
 
-module.exports = {
+export {
   listContacts,
   getContactById,
   removeContact,
   addContact,
-  updateContact,
+  updateContactId,
 };
