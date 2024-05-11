@@ -1,16 +1,16 @@
-const { HttpError } = require("../helpers/HttpError");
-const { Contact } = require("../models/contact");
+import { Contact } from "../models/contact.js";
+import HttpError from "../helpers/HttpError.js";
 
-const getAllContacts = async (req, res, next) => {
+export const getAllContacts = async (req, res, next) => {
   try {
-    const result = await Contact.find({}, "-createdAt, -updatedAt");
+    const result = await Contact.find();
     res.json(result);
   } catch (error) {
     next(error);
   }
 };
 
-const getOneContact = async (req, res, next) => {
+export const getOneContact = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await Contact.findById(id);
@@ -23,7 +23,7 @@ const getOneContact = async (req, res, next) => {
   }
 };
 
-const deleteContact = async (req, res, next) => {
+export const deleteContact = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await Contact.findByIdAndDelete(id);
@@ -36,7 +36,7 @@ const deleteContact = async (req, res, next) => {
   }
 };
 
-const createContact = async (req, res, next) => {
+export const createContact = async (req, res, next) => {
   try {
     const result = await Contact.create(req.body);
     res.status(201).json(result);
@@ -44,8 +44,7 @@ const createContact = async (req, res, next) => {
     next(error);
   }
 };
-
-const updateContact = async (req, res, next) => {
+export const updateContact = async (req, res, next) => {
   try {
     const { id } = req.params;
     const result = await Contact.findByIdAndUpdate(id, req.body, { new: true });
@@ -64,10 +63,15 @@ const updateContact = async (req, res, next) => {
   }
 };
 
-const updateStatusContact = async (req, res, next) => {
+export const updateStatusContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await Contact.findByIdAndUpdate(id, req.body, { new: true });
+    const { favorite } = req.body;
+    const result = await Contact.findOneAndUpdate(
+      { _id: id },
+      { favorite },
+      { new: true }
+    );
 
     if (!result) {
       throw HttpError(404, "Not found");
@@ -77,13 +81,4 @@ const updateStatusContact = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-module.exports = {
-  getAllContacts,
-  getOneContact,
-  deleteContact,
-  createContact,
-  updateContact,
-  updateStatusContact,
 };

@@ -1,18 +1,20 @@
-const express = require("express");
-
-const {
+import express from "express";
+import {
   getAllContacts,
   getOneContact,
   deleteContact,
   createContact,
   updateContact,
   updateStatusContact,
-} = require("../controllers/contactsControllers");
-const { validateBody } = require("../helpers/validateBody");
-const { isValidId } = require("../helpers/isValidId");
-const {
-  schemas: { createContactSchema, updateContactSchema },
-} = require("../models/contact");
+} from "../controllers/contactsControllers.js";
+
+import isValidId from "../helpers/isValidId.js";
+import validateBody from "../helpers/validateBody.js";
+import {
+  createContactSchema,
+  updateContactSchema,
+  updateFavoriteSchema,
+} from "../models/contact.js";
 
 const contactsRouter = express.Router();
 
@@ -31,6 +33,11 @@ contactsRouter.put(
   updateContact
 );
 
-contactsRouter.patch("/:id/favorite", isValidId, updateStatusContact);
+contactsRouter.patch(
+  "/:id/favorite",
+  isValidId,
+  validateBody(updateFavoriteSchema),
+  updateStatusContact
+);
 
-module.exports = contactsRouter;
+export default contactsRouter;

@@ -1,9 +1,11 @@
-const express = require("express");
-const morgan = require("morgan");
-const cors = require("cors");
-require("dotenv").config();
+import express from "express";
+import morgan from "morgan";
+import cors from "cors";
+import dotenv from "dotenv";
 
-const contactsRouter = require("./routes/contactsRouter");
+import contactsRouter from "./routes/contactsRouter.js";
+
+dotenv.config();
 
 const app = express();
 
@@ -22,4 +24,7 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message });
 });
 
-module.exports = app;
+app.listen(3000, () => {
+  console.log("Server is running. Use our API on port: 3000");
+});
+export default app;

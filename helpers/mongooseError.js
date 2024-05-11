@@ -1,6 +1,6 @@
-const mongooseError = (error, data, next) => {
+const handleMongooseError = (error, data, next) => {
   error.status = 400;
   next();
 };
 
-module.exports = { mongooseError };
+export default handleMongooseError;

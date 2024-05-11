@@ -1,9 +1,6 @@
-const { Schema, model } = require("mongoose");
-const Joi = require("joi");
-
-const { mongooseError } = require("../helpers/mongooseError");
-
-const phoneRegExp = /^\(\d{3}\) \d{3}-\d{4}$/;
+import Joi from "joi";
+import { Schema, model } from "mongoose";
+import handleMongooseError from "../helpers/handleMongooseError.js";
 
 const contactSchema = new Schema(
   {
@@ -13,12 +10,11 @@ const contactSchema = new Schema(
     },
     email: {
       type: String,
-      required: true,
+      required: [true, "Set email for contact"],
     },
     phone: {
       type: String,
-      match: phoneRegExp,
-      required: true,
+      required: [true, "Set a contact phone number"],
     },
     favorite: {
       type: Boolean,
@@ -28,30 +24,24 @@ const contactSchema = new Schema(
   { versionKey: false, timestamps: true }
 );
 
-contactSchema.post("save", mongooseError);
+contactSchema.post("save", handleMongooseError);
 
-const createContactSchema = Joi.object({
+export const createContactSchema = Joi.object({
   name: Joi.string().required(),
-  email: Joi.string().required(),
+  email: Joi.string().email().required(),
   phone: Joi.string().required(),
   favorite: Joi.boolean(),
 });
 
-const updateContactSchema = Joi.object({
+export const updateContactSchema = Joi.object({
   name: Joi.string(),
-  email: Joi.string(),
+  email: Joi.string().email(),
   phone: Joi.string(),
   favorite: Joi.boolean(),
 });
 
-const schemas = {
-  createContactSchema,
-  updateContactSchema,
-};
+export const updateFavoriteSchema = Joi.object({
+  favorite: Joi.boolean().required(),
+});
 
-const Contact = model("contact", contactSchema);
-
-module.exports = {
-  Contact,
-  schemas,
-};
+export const Contact = model("contact", contactSchema);
