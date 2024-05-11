@@ -12,6 +12,7 @@
     "joi": "^17.11.0",
     "mongoose": "^8.3.2",
     "morgan": "^1.10.0",
+    "run": "^1.5.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
