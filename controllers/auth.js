@@ -107,7 +107,7 @@ export const updateSubscription = async (req, res, next) => {
   const { _id: userId } = req.user;
   const validSubscriptions = ["starter", "pro", "business"];
   if (!validSubscriptions.includes(subscription)) {
-    next(HttpError(400, "Invalid subscription type"));
+    return next(HttpError(400, "Invalid subscription type"));
   }
   try {
     const updatedUser = await User.findByIdAndUpdate(
@@ -116,7 +116,7 @@ export const updateSubscription = async (req, res, next) => {
       { new: true }
     );
     if (!updatedUser) {
-      throw HttpError(404, "Not authorized");
+      return next(HttpError(404, "Not authorized"));
     }
     res.status(200).json(updatedUser);
   } catch (error) {
@@ -130,12 +130,12 @@ export const updateAvatar = async (req, res, next) => {
       return next(HttpError(400, "No file uploaded"));
     }
 
+    const { _id } = req.user;
+    const user = await User.findById(_id);
     if (!user) {
       return next(HttpError(401, "Not authorized"));
     }
 
-    const { _id } = req.user;
-    const user = await User.findById(_id);
     const { path: tempUpload, originalname } = req.file;
     const fileName = `${_id}_${originalname}`;
     const resultUpload = path.join(avatarsDir, fileName);
@@ -144,7 +144,6 @@ export const updateAvatar = async (req, res, next) => {
     const image = await Jimp.read(resultUpload);
     await image.resize(250, 250).writeAsync(resultUpload);
 
-    //const avatarURL = path.join(fileName);
     const avatarURL = path.join("avatars", fileName);
 
     await User.findByIdAndUpdate(_id, { avatarURL });
