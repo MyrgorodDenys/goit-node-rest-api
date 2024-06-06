@@ -5,10 +5,13 @@ import {
   registerSchema,
   loginSchema,
   updateSubscriptionSchema,
+  emailSchema,
 } from "../models/user.js";
 
 import {
   registerUser,
+  verifyEmail,
+  resendVerifyEmail,
   loginUser,
   getCurrentUser,
   logoutUser,
@@ -22,6 +25,10 @@ import upload from "../middlewares/upload.js";
 const authRouter = express.Router();
 
 authRouter.post("/register", validateBody(registerSchema), registerUser);
+
+authRouter.get("/verify/:verificationToken", verifyEmail);
+
+authRouter.post("/verify", validateBody(emailSchema), resendVerifyEmail);
 
 authRouter.post("/login", validateBody(loginSchema), loginUser);
 
