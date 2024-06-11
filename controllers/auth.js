@@ -11,7 +11,7 @@ import { User } from "../models/user.js";
 import HttpError from "../helpers/HttpError.js";
 import sendEmail from "../helpers/sendEmail.js";
 
-const { SECRET_KEY } = process.env;
+const { SECRET_KEY, BASE_URL } = process.env;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,6 +34,14 @@ export const registerUser = async (req, res, next) => {
       avatarURL,
       verificationToken,
     });
+
+    const verifyEmail = {
+      to: email,
+      subject: "Verify email",
+      html: `<a target="_blank" href="${BASE_URL}/users/verify/${verificationToken}">Click verify email</a>`,
+    };
+    await sendEmail(verifyEmail);
+
     res.status(201).json({
       email: newUser.email,
       subscription: newUser.subscription,
@@ -158,7 +166,7 @@ export const updateSubscription = async (req, res, next) => {
   const { _id: userId } = req.user;
   const validSubscriptions = ["starter", "pro", "business"];
   if (!validSubscriptions.includes(subscription)) {
-    next(HttpError(400, "Invalid subscription type"));
+    return next(HttpError(400, "Invalid subscription type"));
   }
   try {
     const updatedUser = await User.findByIdAndUpdate(
@@ -167,7 +175,7 @@ export const updateSubscription = async (req, res, next) => {
       { new: true }
     );
     if (!updatedUser) {
-      throw HttpError(404, "Not authorized");
+      return next(HttpError(404, "Not authorized"));
     }
     res.status(200).json(updatedUser);
   } catch (error) {
@@ -181,12 +189,12 @@ export const updateAvatar = async (req, res, next) => {
       return next(HttpError(400, "No file uploaded"));
     }
 
+    const { _id } = req.user;
+    const user = await User.findById(_id);
     if (!user) {
       return next(HttpError(401, "Not authorized"));
     }
 
-    const { _id } = req.user;
-    const user = await User.findById(_id);
     const { path: tempUpload, originalname } = req.file;
     const fileName = `${_id}_${originalname}`;
     const resultUpload = path.join(avatarsDir, fileName);
@@ -195,7 +203,6 @@ export const updateAvatar = async (req, res, next) => {
     const image = await Jimp.read(resultUpload);
     await image.resize(250, 250).writeAsync(resultUpload);
 
-    //const avatarURL = path.join(fileName);
     const avatarURL = path.join("avatars", fileName);
 
     await User.findByIdAndUpdate(_id, { avatarURL });
